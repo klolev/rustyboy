@@ -1,12 +1,16 @@
 import Foundation
+import RustyboyCoreBindings
 import MetalKit
 
 class ScreenRenderer: NSObject, MTKViewDelegate {
     private let device: MTLDevice
     private let pipelineState: MTLRenderPipelineState
     private let onDraw: (() -> Data)?
+    private let viewModel: GameViewModel
     private let commandQueue: MTLCommandQueue
     private var fragmentShaderParams: FragmentShaderParams
+    private var currentTime: CFTimeInterval = CACurrentMediaTime()
+    private var frequency: Double = 4194304
 
     lazy var vertexBuffer: MTLBuffer = {
         let vertices = [
@@ -39,9 +43,10 @@ class ScreenRenderer: NSObject, MTKViewDelegate {
         return self.device.makeTexture(descriptor: textureDescriptor)!
     }()
 
-    init?(device: MTLDevice, onDraw: (() -> Data)? = nil) {
+    init?(device: MTLDevice, viewModel: GameViewModel) {
         self.device = device
         self.commandQueue = device.makeCommandQueue()!
+        self.viewModel = viewModel
         do {
             self.pipelineState = try ScreenRenderer.buildRenderPipelineWith(device: self.device)
         } catch {
@@ -49,7 +54,7 @@ class ScreenRenderer: NSObject, MTKViewDelegate {
             return nil
         }
 
-        self.onDraw = onDraw
+        self.onDraw = viewModel.renderer(withGameboy: viewModel.gameboy!)
         
         self.fragmentShaderParams = FragmentShaderParams(renderSize: [0, 0],
                                                          textureSize: [.screenWidth, .screenHeight])
@@ -62,12 +67,22 @@ class ScreenRenderer: NSObject, MTKViewDelegate {
     }
 
     func draw(in view: MTKView) {
-        if var data = self.onDraw?() {
-            data.withUnsafeMutableBytes {
-                self.updateTextureWith(bufferPointer: $0)
+        let newTime = CACurrentMediaTime()
+        let deltaTime = newTime - self.currentTime
+        self.currentTime = newTime
+        
+        let cycles = Int64(self.frequency * deltaTime)
+        for _ in (1...cycles) {
+            let shouldDraw = viewModel.gameboy!.step(input: .init(heldButtons: viewModel.heldButtons))
+            
+            if (shouldDraw) {
+                var data = viewModel.gameboy?.getFrame()
+                data?.withUnsafeMutableBytes {
+                    self.updateTextureWith(bufferPointer: $0)
+                }
             }
         }
-
+        
         guard let commandBuffer = self.commandQueue.makeCommandBuffer(),
               let renderPassDescriptor = view.currentRenderPassDescriptor,
               let currentDrawable = view.currentDrawable else { return }

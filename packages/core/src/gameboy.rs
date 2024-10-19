@@ -68,7 +68,7 @@ impl Gameboy {
     }
 
     /// Performs a single step to all of the GameBoy's components
-    fn step(&mut self, input: StepInput) -> GameboyStepResult {
+    pub fn step(&mut self, input: StepInput) -> GameboyStepResult {
         GameboyStepResult(
             self.processor.step(&mut self.hardware),
             self.hardware.step(input),

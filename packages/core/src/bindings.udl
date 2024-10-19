@@ -34,6 +34,9 @@ interface RustyboyGameboy {
   void reset();
   bytes run_to_vblank(StepInput input);
   bytes dump_savestate();
+  boolean step(StepInput input);
+  bytes get_frame();
+  
   [Throws=LoadSavestateError]
   void load_savestate(bytes buffer);
 };

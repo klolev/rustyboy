@@ -9,8 +9,9 @@ class GameViewModel {
     let game: Game
     var pauseScreen: Data?
     let now: () -> Date
+    var gameboy: RustyboyGameboy?
+    var heldButtons: UInt8 = 0
     
-    private var heldButtons: UInt8 = 0
 #if canImport(UIKit)
     private var pushDownGenerator: UIImpactFeedbackGenerator
     private var releaseGenerator: UIImpactFeedbackGenerator
@@ -31,7 +32,6 @@ class GameViewModel {
     }
     
     func start() -> Result<RustyboyGameboy, GameStartError> {
-        let gameboy: RustyboyGameboy
         do {
             gameboy = try RustyboyGameboy(buffer: game.rom)
         } catch {
@@ -40,7 +40,7 @@ class GameViewModel {
         
         if let latestSavestate = game.savestates.max(by: \.timestamp) {
             do {
-                try gameboy.loadSavestate(buffer: latestSavestate.data)
+                try gameboy?.loadSavestate(buffer: latestSavestate.data)
             } catch {
                 return .failure(.lastSavestateLoadError(error))
             }
@@ -49,7 +49,7 @@ class GameViewModel {
         pushDownGenerator.prepare()
         releaseGenerator.prepare()
 #endif
-        return .success(gameboy)
+        return .success(gameboy!)
     }
     
     func renderer(withGameboy gameboy: RustyboyGameboy) -> () -> Data {
@@ -57,7 +57,7 @@ class GameViewModel {
             guard let self else { return .init() }
             if let pauseScreen { return pauseScreen }
             
-            return gameboy.runToVblank(input: .init(heldButtons: heldButtons))
+            return gameboy.getFrame()
         }
     }
     

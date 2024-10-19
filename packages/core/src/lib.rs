@@ -5,8 +5,9 @@ use crate::cartridge::Cartridge;
 use crate::gameboy::Gameboy;
 use crate::cartridge::cartridge_metadata_error::CartridgeMetadataError;
 use crate::util::savestate::LoadSavestateError;
-use crate::step::StepInput;
 use crate::hardware::joypad::Button;
+use crate::video::status_register::StatusMode;
+use crate::step::{StepInput, GameboyStepResult};
 
 pub mod bus;
 pub mod step;
@@ -39,6 +40,21 @@ impl RustyboyGameboy {
         let mut gb = self.gameboy.lock().unwrap();
         gb.run_to_vblank(input);
         gb.hardware().video.screen().buffer.rgba().to_vec()
+    }
+
+    pub fn get_frame(&self) -> Vec<u8> {
+        let mut gb = self.gameboy.lock().unwrap();
+        gb.hardware().video.screen().buffer.rgba().to_vec()
+    }
+
+    pub fn step(&self, input: StepInput) -> bool {
+        let mut gb = self.gameboy.lock().unwrap();
+
+        if let GameboyStepResult(_, Some(StatusMode::VBlank)) = gb.step(input) {
+            return true;
+        }
+
+        false
     }
 
     pub fn dump_savestate(&self) -> Vec<u8> {

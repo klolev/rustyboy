@@ -65,7 +65,7 @@ struct GameView: View {
             } else {
                 VStack(spacing: 16) {
                     if let gameboy {
-                        ScreenView(render: viewModel.renderer(withGameboy: gameboy))
+                        ScreenView(viewModel: viewModel)
                             .aspectRatio(.screenWidth / .screenHeight, contentMode: .fit)
                     }
                     

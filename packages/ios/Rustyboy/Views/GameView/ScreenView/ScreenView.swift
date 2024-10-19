@@ -10,11 +10,11 @@ struct ScreenView: ViewRepresentable {
     typealias UIViewType = MTKView
     #endif
     
-    let render: () -> Data
+    let viewModel: GameViewModel
     private let device = MTLCreateSystemDefaultDevice()!
 
     func makeCoordinator() -> MTKViewDelegate {
-        ScreenRenderer(device: device, onDraw: render)!
+        ScreenRenderer(device: device, viewModel: viewModel)!
     }
 
     func makeView(context: Context) -> MTKView {
@@ -35,11 +35,11 @@ struct ScreenView: ViewRepresentable {
     func updateView(_ view: MTKView, context: Context) {}
 }
 
-#Preview {
-    ScreenView(render: {
-        Data(repeating: 0xFF,
-             count: .screenWidth * .screenHeight * 4)
-    })
-    .aspectRatio(.screenWidth / .screenHeight, contentMode: .fit)
-    .background(Color.black)
-}
+//#Preview {
+//    ScreenView(render: {
+//        Data(repeating: 0xFF,
+//             count: .screenWidth * .screenHeight * 4)
+//    })
+//    .aspectRatio(.screenWidth / .screenHeight, contentMode: .fit)
+//    .background(Color.black)
+//}
