@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "RustyboyCore",
-    platforms: [.iOS(.v14)],
+    platforms: [.iOS(.v14), .macOS(.v10_15)],
     products: [
         .library(
             name: "RustyboyCore",

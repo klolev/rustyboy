@@ -3,8 +3,13 @@ import MetalKit
 import SwiftUI
 import RustyboyCoreBindings
 
-struct ScreenView: UIViewRepresentable {
+struct ScreenView: ViewRepresentable {
+    #if canImport(AppKit)
+    typealias NSViewType = MTKView
+    #else
     typealias UIViewType = MTKView
+    #endif
+    
     let render: () -> Data
     private let device = MTLCreateSystemDefaultDevice()!
 
@@ -12,21 +17,22 @@ struct ScreenView: UIViewRepresentable {
         ScreenRenderer(device: device, onDraw: render)!
     }
 
-    func makeUIView(context: Context) -> MTKView {
+    func makeView(context: Context) -> MTKView {
         let mtkView = MTKView()
         mtkView.device = device
         mtkView.colorPixelFormat = .bgra8Unorm
+        #if canImport(UIKit)
         mtkView.isOpaque = true
+        #endif
         mtkView.preferredFramesPerSecond = 60
         mtkView.delegate = context.coordinator
-        mtkView.backgroundColor = .blue
         mtkView.autoResizeDrawable = true
         mtkView.drawableSize = mtkView.frame.size
 
         return mtkView
     }
 
-    func updateUIView(_ uiView: MTKView, context: Context) {}
+    func updateView(_ view: MTKView, context: Context) {}
 }
 
 #Preview {

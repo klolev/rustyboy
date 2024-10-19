@@ -1,9 +1,9 @@
-use clap::App;
+use clap::Parser;
 
 use rustyboy_core::cartridge::Cartridge;
-use rustyboy_core::config::Config;
 use rustyboy_core::debugger::Debugger;
 use rustyboy_core::gameboy::{DeviceType, Gameboy, GameboyEvent};
+use rustyboy_core::step::StepInput;
 use std::fs;
 use std::process::exit;
 
@@ -15,29 +15,44 @@ use rustyboy_core::cartridge::cartridge_metadata::CartridgeMetadata;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// ROM path
+    rom_path: String,
+
+    /// Enable debugger
+    #[arg(short, long)]
+    debug: bool,
+
+    /// Print cartridge metadata
+    #[arg(short, long)]
+    info: bool,
+
+    /// Display background contents
+    #[arg(short, long)]
+    background: bool,
+
+    /// Display tile data
+    #[arg(short, long)]
+    tiles: bool,
+
+    /// Display sprite data
+    #[arg(short, long)]
+    sprites: bool,
+}
+
 pub fn run() {
-    let matches = App::new("rustyboy")
-        .version(crate_version!())
-        .about("Gameboy emulator written in Rust.")
-        .args_from_usage(
-            "<rom_path> 'ROM path'
-            -d, --debug 'Enable debugger'
-            -i, --info 'Print cartridge metadata'
-            -b, --background 'Display background contents'
-            -t --tiles 'Display tile data'
-            -s --sprites 'Display sprite data'",
-        )
-        .get_matches();
+    let args = Args::parse();
 
-    let path = matches.value_of("rom_path").unwrap();
-    let cartridge = Cartridge::from_file(path).unwrap();
+    let cartridge = Cartridge::from_file(&args.rom_path).unwrap();
 
-    if matches.is_present("info") {
+    if args.info {
         print_cartridge_info(cartridge.metadata());
         exit(0);
     }
 
-    let debugger = if matches.is_present("debug") {
+    let debugger = if args.debug {
         Some(Debugger {
             forced_break: true,
             breakpoints: vec![],
@@ -46,27 +61,22 @@ pub fn run() {
         None
     };
 
-    let config = Config {
-        device_type: DeviceType::GameBoy,
-        debugger,
-    };
-
     let options = RunOptions {
-        show_background: matches.is_present("background"),
-        show_tile_data: matches.is_present("tiles"),
-        show_sprite_data: matches.is_present("sprites"),
-        path: PathBuf::from(path),
+        show_background: args.background,
+        show_tile_data: args.tiles,
+        show_sprite_data: args.sprites,
+        path: PathBuf::from(args.rom_path),
     };
 
-    let mut gameboy = Gameboy::new(cartridge, &config);
-    let savestate_path = Path::new(path).with_extension("state");
+    let mut gameboy = Gameboy::new(cartridge);
+    let savestate_path = Path::new(&args.rom_path).with_extension("state");
     if let Ok(buffer) = fs::read(savestate_path) {
         gameboy
             .load_savestate(buffer)
             .unwrap_or_else(|_| println!("Couldn't load savestate. Maybe it is corrupted?"))
     }
 
-    start_emulation(gameboy, config, options);
+    start_emulation(gameboy, debugger, options);
 }
 
 fn print_cartridge_info(metadata: &CartridgeMetadata) {
@@ -93,9 +103,8 @@ struct RunOptions {
     pub path: PathBuf,
 }
 
-fn start_emulation(mut gameboy: Gameboy, config: Config, options: RunOptions) {
+fn start_emulation(mut gameboy: Gameboy, mut debugger: Option<Debugger>, options: RunOptions) {
     let mut windows = create_windows(&options);
-    let mut debugger = config.debugger;
     let mut shell_debugger = ShellDebugger::default();
 
     let mut last_time = Instant::now();
@@ -107,7 +116,10 @@ fn start_emulation(mut gameboy: Gameboy, config: Config, options: RunOptions) {
         }
         last_time = Instant::now();
 
-        if let GameboyEvent::Debugger(debug_info) = gameboy.run_to_event(debugger.as_mut()) {
+        let input = StepInput {
+            held_buttons: 0
+        };
+        if let GameboyEvent::Debugger(debug_info) = gameboy.run_to_event(input, debugger.as_mut()) {
             shell_debugger.run(debugger.as_mut().unwrap(), debug_info.as_ref())
         }
 

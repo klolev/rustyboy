@@ -1,7 +1,8 @@
 use glium::{
-    glutin::{dpi::LogicalSize, ContextBuilder, EventsLoop, WindowBuilder},
+    backend::glutin::simple_window_builder::{GliumEventLoop, SimpleWindowBuilder},
     Display,
 };
+use glium::backend::glutin::glutin::surface::WindowSurface;
 use rustyboy_core::gameboy::Gameboy;
 
 pub mod background;
@@ -15,16 +16,12 @@ pub trait Window {
 pub fn create_display(
     title: &str,
     dimensions: (usize, usize),
-    events_loop: &EventsLoop,
-) -> Display {
-    let window = WindowBuilder::new()
+    events_loop: &dyn GliumEventLoop,
+) -> Display<WindowSurface> {
+    SimpleWindowBuilder::new()
         .with_title(title)
-        .with_dimensions(LogicalSize {
-            width: dimensions.0 as f64,
-            height: dimensions.1 as f64,
-        });
-    let ctx = ContextBuilder::new();
-    Display::new(window, ctx, &events_loop).unwrap()
+        .with_inner_size(dimensions.0 as f64, dimensions.1 as f64)
+        .build(events_loop).1
 }
 
 pub enum UpdateResult {

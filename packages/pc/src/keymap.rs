@@ -1,18 +1,19 @@
-use glium::glutin::{ElementState, KeyboardInput, VirtualKeyCode};
+use glium::backend::winit::event::{KeyEvent, ElementState};
+use glium::backend::winit::keyboard::KeyCode;
 
 use rustyboy_core::hardware::joypad::{Button, Input, InputType};
 
-pub fn keymap(input: KeyboardInput) -> Option<Input> {
+pub fn keymap(input: KeyEvent) -> Option<Input> {
     let key_code = input.virtual_keycode?;
     let button = match key_code {
-        VirtualKeyCode::Up => Button::Up,
-        VirtualKeyCode::Down => Button::Down,
-        VirtualKeyCode::Left => Button::Left,
-        VirtualKeyCode::Right => Button::Right,
-        VirtualKeyCode::Return => Button::Start,
-        VirtualKeyCode::Space => Button::Select,
-        VirtualKeyCode::X => Button::B, // TODO: use scancode for those so keymaps dont change the position
-        VirtualKeyCode::Z => Button::A,
+        KeyCode::ArrowUp => Button::Up,
+        KeyCode::ArrowDown => Button::Down,
+        KeyCode::ArrowLeft => Button::Left,
+        KeyCode::ArrowRight => Button::Right,
+        KeyCode::Enter => Button::Start,
+        KeyCode::Space => Button::Select,
+        KeyCode::KeyX => Button::B, // TODO: use scancode for those so keymaps dont change the position
+        KeyCode::KeyZ => Button::A,
         _ => return None,
     };
 

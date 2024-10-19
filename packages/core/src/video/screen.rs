@@ -208,9 +208,16 @@ impl Screen {
 
             let sprite_y = ly - absolute.1 + start_y;
 
-            let tile_relative_index = (sprite_y - sprite_y % TILE_SIZE) / TILE_SIZE;
-            let tile = tile_data[(tile_relative_index + entry.tile_number) as usize];
-            let tile_y = sprite_y - tile_relative_index * TILE_SIZE;
+            let flip_aware_sprite_y = if entry.y_flipped() { 15 - sprite_y } else { sprite_y };
+            let tile_number = if tall_sprites {
+                if flip_aware_sprite_y < 8 {
+                    entry.tile_number & 0xFE
+                } else {
+                    entry.tile_number | 0x1
+                }
+            } else { entry.tile_number };
+            let tile = tile_data[(tile_number) as usize];
+            let tile_y = sprite_y % 8;
 
             let abs_x2 = TILE_SIZE - start_x + absolute.0;
             let inner_end_x = if abs_x2 >= SCREEN_SIZE.0 as u8 {

@@ -35,6 +35,9 @@
         }
       }
     },
+    "Game" : {
+
+    },
     "games" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -119,6 +122,9 @@
           }
         }
       }
+    },
+    "oop" : {
+
     },
     "play" : {
       "extractionState" : "manual",

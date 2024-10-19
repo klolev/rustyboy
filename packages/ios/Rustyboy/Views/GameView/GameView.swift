@@ -35,6 +35,8 @@ struct GameView: View {
         guard let gameboy else { return }
         
         switch input {
+        case .didTapPeer:
+            return // kek
         case .didTapSavestate(let savestate):
             let result = viewModel.load(savestate: savestate, withGameboy: gameboy)
             if let failure = result.failure {
@@ -67,11 +69,13 @@ struct GameView: View {
                             .aspectRatio(.screenWidth / .screenHeight, contentMode: .fit)
                     }
                     
+                    #if os(iOS)
                     Spacer()
                     
                     GamepadView(didChangeDirection: viewModel.didChange(direction:),
                                 didChangeHeldButtons: viewModel.didChange(heldButtons:),
                                 didPressMenuButton: didPressMenuButton)
+                    #endif
                 }
                 .background {
                     ZStack {
@@ -100,5 +104,7 @@ struct GameView: View {
                 }
             }
         }
+        .modifier(KeyBindingsModifier(didChangeDirection: viewModel.didChange(direction:),
+                                      didChangeHeldButtons: viewModel.didChange(heldButtons:)))
     }
 }

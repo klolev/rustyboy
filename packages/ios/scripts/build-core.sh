@@ -1,10 +1,11 @@
 #!/bin/sh
 
-REPO_ROOT=/Users/felixleveille/src/flix477/rustyboy
+REPO_ROOT=/Users/felixleveille/src/cloclo/rustyboy
 
 cd $REPO_ROOT/packages/core \
   && cargo build --release --target=aarch64-apple-ios \
   && cargo build --release --target=aarch64-apple-ios-sim \
+  && cargo build --release --target=aarch64-apple-darwin \
   && cd ../uniffi-bindgen \
   && cargo run generate ../core/src/bindings.udl -l swift --out-dir ../core/target/ios-bindings \
   && cd ../core \
@@ -14,5 +15,7 @@ cd $REPO_ROOT/packages/core \
     -library target/aarch64-apple-ios/release/librustyboy_core.a \
     -headers target/ios-bindings \
     -library target/aarch64-apple-ios-sim/release/librustyboy_core.a \
+    -headers target/ios-bindings \
+    -library target/aarch64-apple-darwin/release/librustyboy_core.a \
     -headers target/ios-bindings \
     -output target/RustyboyCore.xcframework

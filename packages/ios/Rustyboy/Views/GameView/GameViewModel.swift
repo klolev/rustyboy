@@ -1,6 +1,8 @@
 import Foundation
 import RustyboyCoreBindings
+#if canImport(UIKit)
 import UIKit
+#endif
 
 @Observable
 class GameViewModel {
@@ -9,14 +11,18 @@ class GameViewModel {
     let now: () -> Date
     
     private var heldButtons: UInt8 = 0
+#if canImport(UIKit)
     private var pushDownGenerator: UIImpactFeedbackGenerator
     private var releaseGenerator: UIImpactFeedbackGenerator
+#endif
     
     init(game: Game, now: @escaping () -> Date = Date.init) {
         self.game = game
         self.now = now
+#if canImport(UIKit)
         self.pushDownGenerator = .init(style: .rigid)
         self.releaseGenerator = .init(style: .soft)
+#endif
     }
     
     enum GameStartError: Error {
@@ -39,9 +45,10 @@ class GameViewModel {
                 return .failure(.lastSavestateLoadError(error))
             }
         }
-        
+#if canImport(UIKit)
         pushDownGenerator.prepare()
         releaseGenerator.prepare()
+#endif
         return .success(gameboy)
     }
     
@@ -94,22 +101,27 @@ class GameViewModel {
     func didChange(direction: DirectionalPadView.Direction?) {
         heldButtons = (heldButtons & 0b00001111) | (direction?.rustValue ?? 0)
         
+#if canImport(UIKit)
         if direction != nil {
             pushDownGenerator.impactOccurred()
         } else {
             releaseGenerator.impactOccurred(intensity: 0.7)
         }
+#endif
     }
     
     func didChange(heldButtons: GamepadView.ButtonSet) {
         let oldHeldButtons = self.heldButtons
         self.heldButtons = (self.heldButtons & 0b11110000) | heldButtons.rawValue
+        
+#if canImport(UIKit)
         if (oldHeldButtons ^ self.heldButtons) & oldHeldButtons != 0 {
             releaseGenerator.impactOccurred(intensity: 0.7)
             
         } else if (oldHeldButtons ^ self.heldButtons) & (~oldHeldButtons) != 0 {
             pushDownGenerator.impactOccurred()
         }
+#endif
     }
 }
 

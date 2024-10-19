@@ -1,12 +1,12 @@
 uniffi::include_scaffolding!("bindings");
 
 use std::sync::Mutex;
-use crate::hardware::joypad::Button;
 use crate::cartridge::Cartridge;
 use crate::gameboy::Gameboy;
 use crate::cartridge::cartridge_metadata_error::CartridgeMetadataError;
 use crate::util::savestate::LoadSavestateError;
 use crate::step::StepInput;
+use crate::hardware::joypad::Button;
 
 pub mod bus;
 pub mod step;
@@ -18,6 +18,7 @@ pub mod hardware;
 pub mod processor;
 pub mod util;
 pub mod video;
+pub mod sound;
 
 pub struct RustyboyGameboy {
     gameboy: Mutex<Gameboy>

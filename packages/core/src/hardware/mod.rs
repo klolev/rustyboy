@@ -8,9 +8,10 @@ use self::timer::Timer;
 use crate::util::savestate::{read_savestate_byte, LoadSavestateError, Savestate, SavestateStream};
 use crate::video::status_register::StatusMode;
 use crate::step::StepInput;
+use crate::sound::Sound;
 
 pub mod joypad;
-mod timer;
+pub mod timer;
 
 pub struct Hardware {
     pub cartridge: Cartridge,
@@ -20,6 +21,7 @@ pub struct Hardware {
     pub video: Video,
     internal_ram: [u8; 8192],
     high_ram: [u8; 127],
+    sound: Sound
 }
 
 impl Hardware {
@@ -32,6 +34,7 @@ impl Hardware {
             video: Video::default(),
             internal_ram: [0; 8192],
             high_ram: [0; 127],
+            sound: Sound::default()
         }
     }
 
@@ -103,28 +106,7 @@ impl Readable for Hardware {
 
             0xFF0F | 0xFFFF => self.interrupt_handler.read(address), // interrupt
 
-            0xFF10 => 0,          // sound mode 1 register, sweep
-            0xFF11 => 0,          // sound mode 1 register, sound length
-            0xFF12 => 0,          // sound mode 1 register, envelope
-            0xFF13 => 0,          // sound mode 1 register, frequency low
-            0xFF14 => 0,          // sound mode 1 register, frequency high
-            0xFF16 => 0,          // sound mode 2 register, sound length
-            0xFF17 => 0,          // sound mode 2 register, envelope
-            0xFF18 => 0,          // sound mode 2 register, frequency low
-            0xFF19 => 0,          // sound mode 2 register, frequency high
-            0xFF1A => 0,          // sound mode 3 register, on/off
-            0xFF1B => 0,          // sound mode 3 register, sound length
-            0xFF1C => 0,          // sound mode 3 register, output level
-            0xFF1D => 0,          // sound mode 3 register, frequency low
-            0xFF1E => 0,          // sound mode 3 register, frequency high
-            0xFF20 => 0,          // sound mode 4 register, sound length
-            0xFF21 => 0,          // sound mode 4 register, envelope
-            0xFF22 => 0,          // sound mode 4 register, polynomial counter
-            0xFF23 => 0,          // sound mode 4 register, counter/consecutive
-            0xFF24 => 0,          // channel control - on/off - volume
-            0xFF25 => 0,          // sound output terminal selection
-            0xFF26 => 0,          // sound on/off
-            0xFF30..=0xFF3F => 0, // waveform ram
+            0xFF10..=0xFF3F => self.sound.read(address), // apu
 
             0xFF80..=0xFFFE => {
                 let address = address - 0xFF80;
@@ -180,28 +162,7 @@ impl Writable for Hardware {
 
             0xFF0F | 0xFFFF => self.interrupt_handler.write(address, value), // interrupt enable (IE)
 
-            0xFF10 => self.audio_unimplemented(), // sound mode 1 register, sweep
-            0xFF11 => self.audio_unimplemented(), // sound mode 1 register, sound length
-            0xFF12 => self.audio_unimplemented(), // sound mode 1 register, envelope
-            0xFF13 => self.audio_unimplemented(), // sound mode 1 register, frequency low
-            0xFF14 => self.audio_unimplemented(), // sound mode 1 register, frequency high
-            0xFF16 => self.audio_unimplemented(), // sound mode 2 register, sound length
-            0xFF17 => self.audio_unimplemented(), // sound mode 2 register, envelope
-            0xFF18 => self.audio_unimplemented(), // sound mode 2 register, frequency low
-            0xFF19 => self.audio_unimplemented(), // sound mode 2 register, frequency high
-            0xFF1A => self.audio_unimplemented(), // sound mode 3 register, on/off
-            0xFF1B => self.audio_unimplemented(), // sound mode 3 register, sound length
-            0xFF1C => self.audio_unimplemented(), // sound mode 3 register, output level
-            0xFF1D => self.audio_unimplemented(), // sound mode 3 register, frequency low
-            0xFF1E => self.audio_unimplemented(), // sound mode 3 register, frequency high
-            0xFF20 => self.audio_unimplemented(), // sound mode 4 register, sound length
-            0xFF21 => self.audio_unimplemented(), // sound mode 4 register, envelope
-            0xFF22 => self.audio_unimplemented(), // sound mode 4 register, polynomial counter
-            0xFF23 => self.audio_unimplemented(), // sound mode 4 register, counter/consecutive
-            0xFF24 => self.audio_unimplemented(), // channel control - on/off - volume
-            0xFF25 => self.audio_unimplemented(), // sound output terminal selection
-            0xFF26 => self.audio_unimplemented(), // sound on/off
-            0xFF30..=0xFF3F => self.audio_unimplemented(), // waveform ram
+            0xFF10..=0xFF3F => self.sound.write(address, value), // apu
 
             0xFF80..=0xFFFE => {
                 let address = address - 0xFF80;

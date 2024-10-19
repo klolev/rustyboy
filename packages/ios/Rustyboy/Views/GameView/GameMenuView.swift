@@ -12,7 +12,14 @@ struct GameMenuView: View {
     let sendInput: (Input) -> Void
     
     @Query
-    private let _savestates: [Savestate]
+    private var _savestates: [Savestate]
+    
+    @Environment(\.nearbyBrowser)
+    private var nearbyBrowser
+    
+    @State
+    private var peers: Set<String> = []
+    
     private let game: Game
     
     @Environment(\.modelContext)
@@ -24,6 +31,7 @@ struct GameMenuView: View {
         case didTapSave
         case didTapDismiss
         case didTapExit
+        case didTapPeer
     }
     
     private var savestates: [Savestate] {
@@ -79,12 +87,14 @@ struct GameMenuView: View {
                 LazyHStack {
                     ForEach(savestates) { savestate in
                         VStack {
+                            #if canImport(UIKit)
                             if let image = CGImage.from(savestateData: savestate.image) {
                                 Image(uiImage: UIImage(cgImage: image))
                                     .resizable()
                                     .aspectRatio(.screenWidth / .screenHeight, contentMode: .fit)
                                     .frame(width: .screenWidth)
                             }
+                            #endif
                             
                             Text(savestate.timestamp.description)
                                 .font(.semiBold(14))
@@ -96,6 +106,14 @@ struct GameMenuView: View {
             }
             .frame(maxWidth: .infinity)
             .background(cardBackground)
+            
+            if !peers.isEmpty {
+                HStack {
+                    ForEach(Array(peers), id: \.self) { peer in
+                        Text(peer)
+                    }
+                }
+            }
             
             HStack {
                 Spacer()
@@ -129,6 +147,11 @@ struct GameMenuView: View {
         .padding()
         .frame(maxWidth: .infinity)
         .background(.gameboy)
+        .task {
+            for await peers in nearbyBrowser.getPeers() {
+                self.peers = peers.map(\.description)
+            }
+        }
     }
 }
 

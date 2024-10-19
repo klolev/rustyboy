@@ -87,7 +87,7 @@ impl Readable for Cartridge {
                 } else {
                     address as usize
                 };
-                self.buffer[address]
+                self.buffer[address % self.buffer.len()]
             } // switchable rom bank
             0xA000..=0xBFFF => self.read_ram(address as usize), // switchable ram bank
             _ => 0,

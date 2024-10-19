@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "http://github.com/flix477/slingshot.git",
       "state" : {
-        "revision" : "803ca7a79e0877b8e559a3ad1195f2eea9b22776",
-        "version" : "0.3.0"
+        "revision" : "5bdb90131ee5faa23f7179ee3dfc12e71c2c00d0",
+        "version" : "0.4.2"
       }
     },
     {

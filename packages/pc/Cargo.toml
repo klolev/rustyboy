@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 glium = "*"
-clap = "*"
 console = "0.7.5"
 rustyboy-core = { path = "../core" }
+clap = { version = "4.5.20", features = ["derive"] }
+rand = "0.8.5"

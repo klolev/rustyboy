@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Slingshot
 
 struct HomeView: View {
     @Environment(\.modelContext) 
@@ -21,8 +22,11 @@ struct HomeView: View {
     }
     
     private func didSelectFiles(withResult result: Result<[URL], Error>) {
-        switch result.mapError(HomeViewModel.ImportError.fileImporterError)
-            .flatMap(viewModel.importGames(atURLs:)) {
+        let importResult: Result<[Game], HomeViewModel.ImportError> =
+            result.mapError(HomeViewModel.ImportError.fileImporterError)
+            .flatMap(viewModel.importGames(atURLs:))
+        
+        switch importResult {
         case .success(let newGames):
             withAnimation {
                 for game in newGames {

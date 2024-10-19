@@ -1,4 +1,6 @@
-use glium::glutin::{Event, EventsLoop, WindowEvent};
+use glium::backend::winit::event::{Event, WindowEvent};
+use glium::backend::winit::event_loop::EventLoop;
+use glium::backend::glutin::glutin::surface::WindowSurface;
 use glium::texture::RawImage2d;
 use glium::uniforms::MagnifySamplerFilter;
 use glium::{Display, Surface};
@@ -11,13 +13,13 @@ use crate::keymap::keymap;
 use crate::window::UpdateResult;
 
 pub struct MainWindow {
-    display: Display,
-    events_loop: EventsLoop,
+    display: Display<WindowSurface>,
+    events_loop: EventLoop<()>,
 }
 
 impl MainWindow {
     pub fn new() -> MainWindow {
-        let events_loop = EventsLoop::new();
+        let events_loop = EventLoop::new();
 
         MainWindow {
             display: create_display("Rustyboy", SCREEN_SIZE, &events_loop),
@@ -41,7 +43,7 @@ impl Window for MainWindow {
         target.finish().unwrap();
 
         let mut close = false;
-        self.events_loop.poll_events(|event| match event {
+        self.events_loop.pump_events(|event| match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..

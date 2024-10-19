@@ -32,16 +32,19 @@ struct GamesListView: View {
         self.groupGames = groupGames
     }
     
+    private var viewState: RecentlyPlayedGamesListView.ViewState {
+        switch selectedSort {
+        case .lastPlayed:
+            .recentlyPlayed(.init(groupGames: groupGames))
+        case .alphabetical:
+            .alphabetical(.init())
+        }
+    }
+    
     var body: some View {
         NavigationStack {
-            ScrollViewReader { proxy in
-                if selectedSort == .alphabetical {
-                    AlphabeticGamesListView(proxy: proxy, didSelectGame: didSelectGame)
-                        .padding(.top, 16)
-                } else {
-                    RecentlyPlayedGamesListView(didSelectGame: didSelectGame, groupGames: groupGames)
-                }
-            }
+            RecentlyPlayedGamesListView(state: viewState,
+                                        didSelectGame: didSelectGame)
             .animation(.default, value: selectedSort)
             .frame(maxWidth: .infinity)
             .toolbar {
@@ -58,7 +61,9 @@ struct GamesListView: View {
                 }
             }
             .navigationTitle("games")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
 }

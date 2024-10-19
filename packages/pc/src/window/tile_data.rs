@@ -1,4 +1,6 @@
-use glium::glutin::{Event, EventsLoop, WindowEvent};
+use glium::backend::winit::event::{Event, WindowEvent};
+use glium::backend::glutin::glutin::surface::WindowSurface;
+use glium::backend::winit::event_loop::EventLoop;
 use glium::texture::RawImage2d;
 use glium::uniforms::MagnifySamplerFilter;
 use glium::{Display, Surface};
@@ -16,13 +18,13 @@ const TILE_SIZE: usize = 8;
 const GRID_DIMENSIONS: (usize, usize) = (12, 32);
 
 pub struct TileDataWindow {
-    display: Display,
-    events_loop: EventsLoop,
+    display: Display<WindowSurface>,
+    events_loop: EventLoop<()>,
 }
 
 impl TileDataWindow {
     pub fn new() -> TileDataWindow {
-        let events_loop = EventsLoop::new();
+        let events_loop = EventLoop::new();
 
         TileDataWindow {
             display: create_display("Rustyboy | Tile data", BACKGROUND_SIZE, &events_loop),
@@ -68,7 +70,7 @@ impl Window for TileDataWindow {
 
         target.finish().unwrap();
 
-        self.events_loop.poll_events(|event| match event {
+        self.events_loop.pump_events(|event| match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..

@@ -1,3 +1,4 @@
+
 pub fn get_bit(value: u8, idx: u8) -> bool {
     (value >> idx) & 1 != 0
 }
