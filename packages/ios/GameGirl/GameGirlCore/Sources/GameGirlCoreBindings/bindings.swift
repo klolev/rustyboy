@@ -1,0 +1,1 @@
+../../../../../core/target/ios-bindings/gamegirl_core.swift
