@@ -1,4 +1,4 @@
-mod cartridge_capability;
+pub mod cartridge_capability;
 pub mod cartridge_metadata_error;
 pub mod cartridge_metadata;
 mod mbc;
@@ -13,7 +13,7 @@ use std::path::Path;
 
 pub struct Cartridge {
     buffer: Vec<u8>,
-    metadata: CartridgeMetadata,
+    pub metadata: CartridgeMetadata,
     mbc: Option<Box<dyn MemoryBankController>>,
     pub ram: Option<Vec<u8>>,
 }
@@ -37,7 +37,7 @@ impl Cartridge {
         let mbc = MBCFactory::from_metadata(&metadata);
 
         let ram = if metadata.ram_size > 0 {
-            Some(vec![0; metadata.ram_size])
+            Some(vec![0; metadata.ram_size as usize])
         } else {
             None
         };

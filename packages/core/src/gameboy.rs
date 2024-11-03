@@ -10,6 +10,8 @@ use crate::video::screen::BUFFER_SIZE;
 use crate::video::status_register::StatusMode;
 use crate::step::{StepInput, GameboyStepResult};
 
+pub const CLOCK_SPEED: f64 = 4194304.0;
+
 /// This struct represents a GameBoy with all its components
 pub struct Gameboy {
     processor: Processor,

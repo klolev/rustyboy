@@ -1,6 +1,7 @@
 use glium::backend::winit::event::{Event, WindowEvent};
 use glium::backend::glutin::glutin::surface::WindowSurface;
 use glium::backend::winit::event_loop::EventLoop;
+use glium::backend::winit::platform::pump_events::EventLoopExtPumpEvents;
 use glium::texture::RawImage2d;
 use glium::uniforms::MagnifySamplerFilter;
 use glium::{Display, Surface};
@@ -10,7 +11,6 @@ use rustyboy_core::gameboy::Gameboy;
 use rustyboy_core::video::screen::BACKGROUND_SIZE;
 
 use super::{create_display, Window};
-use crate::keymap::keymap;
 use crate::window::UpdateResult;
 use rustyboy_core::video::color::{Color, ColorFormat};
 
@@ -24,7 +24,7 @@ pub struct TileDataWindow {
 
 impl TileDataWindow {
     pub fn new() -> TileDataWindow {
-        let events_loop = EventLoop::new();
+        let events_loop = EventLoop::new().unwrap();
 
         TileDataWindow {
             display: create_display("Rustyboy | Tile data", BACKGROUND_SIZE, &events_loop),
@@ -70,21 +70,12 @@ impl Window for TileDataWindow {
 
         target.finish().unwrap();
 
-        self.events_loop.pump_events(|event| match event {
+        self.events_loop.pump_events(None, |event, _| match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
             } => {
                 exit(0);
-            }
-            Event::WindowEvent {
-                event: WindowEvent::KeyboardInput { input, .. },
-                ..
-            } => {
-                let input = keymap(input);
-                if let Some(input) = input {
-                    gameboy.send_input(input);
-                }
             }
             _ => {}
         });

@@ -65,7 +65,7 @@ pub fn run() {
         show_background: args.background,
         show_tile_data: args.tiles,
         show_sprite_data: args.sprites,
-        path: PathBuf::from(args.rom_path),
+        path: PathBuf::from(args.rom_path.clone()),
     };
 
     let mut gameboy = Gameboy::new(cartridge);

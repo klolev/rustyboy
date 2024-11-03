@@ -1,6 +1,8 @@
+use glium::winit;
 use glium::backend::winit::event::{Event, WindowEvent};
 use glium::backend::winit::event_loop::EventLoop;
 use glium::backend::glutin::glutin::surface::WindowSurface;
+use glium::backend::winit::platform::pump_events::EventLoopExtPumpEvents;
 use glium::texture::RawImage2d;
 use glium::uniforms::MagnifySamplerFilter;
 use glium::{Display, Surface};
@@ -19,7 +21,7 @@ pub struct MainWindow {
 
 impl MainWindow {
     pub fn new() -> MainWindow {
-        let events_loop = EventLoop::new();
+        let events_loop = winit::event_loop::EventLoopBuilder::new().build().unwrap();
 
         MainWindow {
             display: create_display("Rustyboy", SCREEN_SIZE, &events_loop),
@@ -43,7 +45,7 @@ impl Window for MainWindow {
         target.finish().unwrap();
 
         let mut close = false;
-        self.events_loop.pump_events(|event| match event {
+        self.events_loop.pump_events(None, |event, _| match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
@@ -51,12 +53,12 @@ impl Window for MainWindow {
                 close = true;
             }
             Event::WindowEvent {
-                event: WindowEvent::KeyboardInput { input, .. },
+                event: WindowEvent::KeyboardInput { event, .. },
                 ..
             } => {
-                let input = keymap(input);
+                let input = keymap(event);
                 if let Some(input) = input {
-                    gameboy.send_input(input);
+                    //gameboy.send_input(input);
                 }
             }
             _ => {}

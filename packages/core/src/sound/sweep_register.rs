@@ -1,7 +1,6 @@
 #[derive(Copy, Clone)]
 pub struct SweepRegister {
     pub register: u8,
-    period: i16,
     cycles_left: u8
 }
 
@@ -9,7 +8,6 @@ impl Default for SweepRegister {
     fn default() -> Self {
         Self {
             register: 0,
-            period: 0,
             cycles_left: 4
         }
     }
@@ -32,16 +30,22 @@ impl SweepRegister {
         self.register & 0b111
     }
 
-    fn apply_sweep(&mut self) {
-        let adjustment: i16 = self.period / (2_i16.pow(self.sweep_step() as u32));
-        self.period = self.period.saturating_add(adjustment * (if self.sweep_modifier() == SweepModifier::Increase { 1 } else { -1 }));
+    fn apply_sweep(&mut self, period: u16) -> u16 {
+        let adjustment = period / (1 << self.sweep_step() as u16);
+        if self.sweep_modifier() == SweepModifier::Increase {
+            (period + 1) % 0b111_1111_1111
+        } else {
+            period.saturating_sub(1)
+        }
     }
 
-    pub fn clock(&mut self) {
+    pub fn tick(&mut self, period: u16) -> Option<u16> {
         self.cycles_left = self.cycles_left.saturating_sub(1);
         if self.cycles_left == 0 {
             self.cycles_left = 4;
-            self.apply_sweep();
+            Some(self.apply_sweep(period))
+        } else {
+            None
         }
     }
 }

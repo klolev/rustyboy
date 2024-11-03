@@ -1,9 +1,11 @@
+use std::cmp::{min, max};
+
 #[derive(Copy, Clone)]
 pub struct VolumeEnvelope {
     pub register: u8,
     cycles_left: u8,
     ticks: u8,
-    volume_adjustment: i8
+    pub volume_adjustment: i8
 }
 
 impl Default for VolumeEnvelope {
@@ -23,7 +25,11 @@ enum Direction {
 }
 
 impl VolumeEnvelope {
-    pub fn clock(&mut self) {
+    pub fn trigger(&mut self) {
+        self.volume_adjustment = 0;
+    }
+
+    pub fn tick(&mut self) {
         self.cycles_left = self.cycles_left.saturating_sub(1);
         let sweep_time = self.envelope_sweep();
         if self.cycles_left == 0 && sweep_time > 0 {
@@ -38,8 +44,8 @@ impl VolumeEnvelope {
 
     fn apply_envelope(&mut self) {
         match self.direction() {
-            Direction::Up => { self.volume_adjustment = self.volume_adjustment.saturating_add(1) },
-            Direction::Down => { self.volume_adjustment = self.volume_adjustment.saturating_sub(1) },
+            Direction::Up => { self.volume_adjustment = min(self.volume_adjustment + 1, 0xF) },
+            Direction::Down => { self.volume_adjustment = max(self.volume_adjustment- 1, -0xF) },
         }
     }
 
@@ -57,7 +63,10 @@ impl VolumeEnvelope {
         self.register & 0b111
     }
 
-    pub fn current_volume(self) -> u8 {
-        self.initial_volume().saturating_add_signed(self.volume_adjustment)
+    pub fn current_volume(self) -> f64 {
+        (self.initial_volume()
+            .saturating_add_signed(self.volume_adjustment)
+            .min(15)
+            .max(0) as f64) / 15.0
     }
 }

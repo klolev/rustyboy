@@ -1,17 +1,17 @@
 [package]
-name = "rustyboy-core"
+name = "gamegirl-core"
 version = "0.1.0"
-authors = ["felixleveille <flxleveille@gmail.com>"]
+authors = ["klolev <chloe.leveille.a@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 uniffi = { version = "0.25" }
 thiserror = "1.0.56"
-rand = "*"
+rand = { version = "*", features = ["small_rng"] }
 
 [build-dependencies]
 uniffi = { version = "0.25", features = ["build"] }
 
 [lib]
 crate-type = ["lib", "cdylib", "staticlib"]
-name = "rustyboy_core"
+name = "gamegirl_core"

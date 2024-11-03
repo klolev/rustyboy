@@ -51,16 +51,17 @@ const HEADER_CHECKSUM_OFFSET: usize = 0x014D;
 
 type TitleSection = (String, Option<String>, Option<CGBFlag>);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CartridgeMetadata {
+    pub header: Vec<u8>,
     pub title: String,
     pub manufacturer_code: Option<String>,
     pub cgb_flag: Option<CGBFlag>,
     pub new_licensee_code: Option<String>,
     pub sgb_enhanced: bool,
     pub capabilities: Vec<CartridgeCapability>,
-    pub rom_size: usize,
-    pub ram_size: usize,
+    pub rom_size: u64,
+    pub ram_size: u64,
     pub destination: Destination,
     pub old_licensee_code: Option<u8>,
     pub version: u8,
@@ -73,14 +74,15 @@ impl CartridgeMetadata {
         let (title, manufacturer_code, cgb_flag) = Self::parse_title_section(buffer)?;
 
         Ok(CartridgeMetadata {
+            header: buffer[GAME_TITLE_OFFSET..=VERSION_OFFSET].to_vec(),
             title,
             manufacturer_code,
             cgb_flag,
             new_licensee_code: Self::parse_new_licensee_code(buffer)?,
             sgb_enhanced: buffer[SGB_FLAG_OFFSET] == SBG_FLAG_ENABLED,
             capabilities: CartridgeCapability::from_byte(buffer[CARTRIDGE_TYPE_OFFSET])?,
-            rom_size: Self::parse_rom_size(buffer)? as usize,
-            ram_size: Self::parse_ram_size(buffer)? as usize,
+            rom_size: Self::parse_rom_size(buffer)? as u64,
+            ram_size: Self::parse_ram_size(buffer)? as u64,
             destination: Destination::from(buffer[DESTINATION_OFFSET])?,
             old_licensee_code: Self::parse_old_licensee_code(buffer),
             version: buffer[VERSION_OFFSET],
@@ -160,7 +162,7 @@ impl CartridgeMetadata {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum CGBFlag {
     CGBOnly = 0x80,
     SupportsCGB = 0xC0,
@@ -176,7 +178,7 @@ impl CGBFlag {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Destination {
     Japanese = 0x00,
     NonJapanese = 0x01,

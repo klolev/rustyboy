@@ -1,7 +1,7 @@
 [package]
-name = "rustyboy-pc"
+name = "gamegirl-pc"
 version = "0.1.0"
-authors = ["felixleveille <flxleveille@gmail.com>"]
+authors = ["klolev <chloe.leveille.a@gmail.com>"]
 edition = "2018"
 
 [dependencies]

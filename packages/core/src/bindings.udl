@@ -13,6 +13,51 @@ enum CartridgeMetadataError {
   "IOError",
 };
 
+enum CartridgeCapability {
+    "ROM",
+    "MBC1",
+    "MBC2",
+    "MBC3",
+    "MBC4",
+    "MBC5",
+    "RAM",
+    "Battery",
+    "Timer",
+    "MMM01",
+    "Rumble",
+    "PocketCamera",
+    "BandaiTama5",
+    "HuC1",
+    "HuC3",
+};
+
+enum CGBFlag {
+    "CGBOnly",
+    "SupportsCGB"
+};
+
+enum Destination {
+    "Japanese",
+    "NonJapanese"
+};
+
+dictionary CartridgeMetadata {
+    bytes header;
+    string title;
+    string? manufacturer_code;
+    CGBFlag? cgb_flag;
+    string? new_licensee_code;
+    boolean sgb_enhanced;
+    sequence<CartridgeCapability> capabilities;
+    u64 rom_size;
+    u64 ram_size;
+    Destination destination;
+    u8? old_licensee_code;
+    u8 version;
+    u8 header_checksum;
+    u8 global_checksum;
+};
+
 enum Button {
   "A",
   "B",
@@ -28,18 +73,55 @@ dictionary StepInput {
   u8 held_buttons;
 };
 
-interface RustyboyGameboy {
+dictionary AudioSample {
+  f64 left;
+  f64 right;
+};
+
+dictionary UpdateResult {
+  bytes? frame;
+  sequence<AudioSample>? audio_samples;
+};
+
+dictionary AudioChannelDebugging {
+  u8 initial_volume;
+  boolean enabled;
+  boolean pan_left;
+  boolean pan_right;
+  f64 volume;
+  i8 volume_adjustment;
+  f64 output;
+};
+
+dictionary AudioDebugging {
+  boolean sound_enabled;
+  u8 master_volume_left;
+  u8 master_volume_right;
+  AudioChannelDebugging channel1;
+  AudioChannelDebugging channel2;
+  AudioChannelDebugging channel3;
+  AudioChannelDebugging channel4;
+};
+
+interface GameGirlCartridge {
+  [Throws=CartridgeMetadataError]
+  constructor(bytes buffer);
+  CartridgeMetadata get_metadata();
+};
+
+interface GameGirlGameboy {
   [Throws=CartridgeMetadataError]
   constructor(bytes buffer);
   void reset();
   bytes run_to_vblank(StepInput input);
   bytes dump_savestate();
-  boolean step(StepInput input);
+  UpdateResult update(StepInput input, f64 delta_time);
   bytes get_frame();
+  AudioDebugging get_audio_debugging();
   
   [Throws=LoadSavestateError]
   void load_savestate(bytes buffer);
 };
 
-namespace rustyboy_core {
+namespace gamegirl_core {
 };

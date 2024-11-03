@@ -13,14 +13,14 @@ pub trait Window {
     fn update(&mut self, gameboy: &mut Gameboy) -> UpdateResult;
 }
 
-pub fn create_display(
+pub fn create_display<T: GliumEventLoop>(
     title: &str,
     dimensions: (usize, usize),
-    events_loop: &dyn GliumEventLoop,
+    events_loop: &T,
 ) -> Display<WindowSurface> {
     SimpleWindowBuilder::new()
         .with_title(title)
-        .with_inner_size(dimensions.0 as f64, dimensions.1 as f64)
+        .with_inner_size(dimensions.0 as u32, dimensions.1 as u32)
         .build(events_loop).1
 }
 

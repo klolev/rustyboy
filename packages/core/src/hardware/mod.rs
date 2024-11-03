@@ -9,9 +9,12 @@ use crate::util::savestate::{read_savestate_byte, LoadSavestateError, Savestate,
 use crate::video::status_register::StatusMode;
 use crate::step::StepInput;
 use crate::sound::Sound;
+use crate::hardware::serial::Serial;
 
 pub mod joypad;
 pub mod timer;
+pub mod counter;
+pub mod serial;
 
 pub struct Hardware {
     pub cartridge: Cartridge,
@@ -21,7 +24,8 @@ pub struct Hardware {
     pub video: Video,
     internal_ram: [u8; 8192],
     high_ram: [u8; 127],
-    sound: Sound
+    pub sound: Sound,
+    serial: Serial
 }
 
 impl Hardware {
@@ -34,7 +38,8 @@ impl Hardware {
             video: Video::default(),
             internal_ram: [0; 8192],
             high_ram: [0; 127],
-            sound: Sound::default()
+            sound: Sound::default(),
+            serial: Serial::default()
         }
     }
 
@@ -49,19 +54,21 @@ impl Hardware {
         self.timer = Timer::new();
         self.joypad = Joypad::new();
         self.interrupt_handler = InterruptHandler::new();
+        self.serial = Serial::default();
     }
 
     pub fn step(&mut self, input: StepInput) -> Option<StatusMode> {
         self.joypad.step(input.held_buttons);
         self.timer.clock(&mut self.interrupt_handler);
+        self.sound.clock(self.timer.divider());
+        self.serial
+            .clock(&mut self.interrupt_handler, input.serial_data_input);
         self.video.clock(&mut self.interrupt_handler)
     }
 
     pub fn interrupt_handler(&self) -> &InterruptHandler {
         &self.interrupt_handler
     }
-
-    fn audio_unimplemented(&self) {}
 }
 
 impl Readable for Hardware {
