@@ -50,6 +50,13 @@
             ReferencedContainer = "container:GameGirl.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "MTL_LOG_LEVEL"
+            value = "MTLLogLevelDebug"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

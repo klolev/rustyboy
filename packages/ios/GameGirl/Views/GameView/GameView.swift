@@ -10,6 +10,12 @@ struct GameView: View {
     @Environment(\.scenePhase)
     private var scenePhase
     
+    @Environment(\.colorScheme)
+    private var colorScheme
+    
+    @Environment(\.gamepadStyle)
+    private var gamepadStyle
+    
     @State
     private var gameboy: GameGirlGameboy?
     
@@ -121,7 +127,7 @@ struct GameView: View {
                 GameMenuView(sendInput: on(gameMenuInput:), game: viewModel.game)
                     .transition(.move(edge: .bottom))
             } else {
-                VStack(spacing: 16) {
+                VStack(spacing: 0) {
                     if gameboy != nil {
                         ScreenView(viewModel: viewModel)
                             .aspectRatio(.screenWidth / .screenHeight, contentMode: .fit)
@@ -135,22 +141,13 @@ struct GameView: View {
                     }
                     
                     #if os(iOS)
-                    Spacer()
-                    
                     GamepadView(didChangeDirection: viewModel.didChange(direction:),
                                 didChangeHeldButtons: viewModel.didChange(heldButtons:),
                                 didPressMenuButton: didPressMenuButton)
                     #endif
                 }
                 .background {
-                    ZStack {
-                        Color.gameboy
-                        
-                        LinearGradient(colors: [.clear, .black.opacity(0.05)],
-                                       startPoint: .top,
-                                       endPoint: .bottom)
-                    }
-                    .ignoresSafeArea()
+                    gamepadStyle.wrappedValue.background(forColorScheme: colorScheme)
                 }
             }
         }

@@ -25,6 +25,23 @@ struct GameGirlApp: App {
     
     @State
     private var selectedGame: Game?
+    
+    @Environment(\.self)
+    private var environment
+    
+    @AppStorage("gamepadStyle")
+    private var gamepadStyleName: String?
+    
+    @AppStorage("lcdFilter")
+    private var isLCDFilterEnabled: Bool = false
+    
+    private var gamepadStyle: Binding<GamepadStyle> {
+        $gamepadStyleName.invmap({ rawValue in
+            rawValue.flatMap(GamepadStyle.init(rawValue:)) ?? .gbcRed
+        }, {
+            $0.rawValue(in: environment)
+        })
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -39,6 +56,8 @@ struct GameGirlApp: App {
             }
             #endif
         }
+        .environment(\.gamepadStyle, gamepadStyle)
+        .environment(\.screenFilter, $isLCDFilterEnabled)
         .modelContainer(sharedModelContainer)
         
         #if os(macOS)
@@ -50,6 +69,8 @@ struct GameGirlApp: App {
                 Text("oop")
             }
         }
+        .environment(\.gamepadStyle, gamepadStyle)
+        .environment(\.screenFilter, $isLCDFilterEnabled)
         .modelContainer(sharedModelContainer)
         #endif
     }

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-REPO_ROOT=/Users/felixleveille/src/cloclo/gamegirl
+REPO_ROOT=/Users/klolev/src/cloclo/gamegirl
 
 cd $REPO_ROOT/packages/core \
   && cargo build --release --target=aarch64-apple-ios \

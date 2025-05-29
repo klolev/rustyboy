@@ -24,6 +24,12 @@
         }
       }
     },
+    "Appearance" : {
+
+    },
+    "C" : {
+
+    },
     "delete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -47,6 +53,12 @@
     "GAME GIRL" : {
 
     },
+    "Gameboy" : {
+
+    },
+    "Gameboy Color" : {
+
+    },
     "games" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -63,6 +75,12 @@
           }
         }
       }
+    },
+    "info" : {
+
+    },
+    "L" : {
+
     },
     "L: %u" : {
 
@@ -135,6 +153,15 @@
         }
       }
     },
+    "LCD Filter" : {
+
+    },
+    "Nottendo" : {
+
+    },
+    "O" : {
+
+    },
     "oop" : {
 
     },
@@ -189,6 +216,9 @@
         }
       }
     },
+    "R" : {
+
+    },
     "R: %u" : {
 
     },
@@ -236,6 +266,12 @@
           }
         }
       }
+    },
+    "Selected style" : {
+
+    },
+    "Settings" : {
+
     },
     "Sort" : {
       "localizations" : {

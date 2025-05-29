@@ -53,14 +53,18 @@ class ScreenRenderer: NSObject, MTKViewDelegate {
             return nil
         }
 
-        self.fragmentShaderParams = FragmentShaderParams(renderSize: [0, 0],
-                                                         textureSize: [.screenWidth, .screenHeight])
+        self.fragmentShaderParams = FragmentShaderParams(screenSize: [UInt32.screenWidth, UInt32.screenHeight],
+                                                         pixelSize: [0, 0],
+                                                         texturePixelSize: [1.0 / Float.screenWidth,
+                                                                            1.0 / Float.screenHeight],
+                                                         isLCDFilterEnabled: true)
 
         super.init()
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        self.fragmentShaderParams.renderSize = [UInt32(size.width), UInt32(size.height)]
+        self.fragmentShaderParams.pixelSize = [Float(size.width) / Float.screenWidth,
+                                               Float(size.height) / Float.screenHeight]
     }
 
     func draw(in view: MTKView) {

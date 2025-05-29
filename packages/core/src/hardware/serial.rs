@@ -52,19 +52,23 @@ impl Serial {
     }
 
     fn produce_output(&mut self, input: Option<bool>) -> bool {
-        let value = bits::get_bit(data, 7);
-        self.data = data << 1 | (input ?? value);
+        let value = bits::get_bit(self.data, 7);
+        self.data = self.data << 1 | (input.unwrap_or(value) as u8);
         value
     }
 }
 
 impl Serial {
     pub fn clock(&mut self, interrupt_handler: &mut InterruptHandler, serial_input: Option<bool>) -> Option<bool> {
-        if Some(let serial_input) = serial_input {
+        if let Some(value) = serial_input {
             self.produce_output(serial_input);
+            None
         } else if self.counter.clock() == ClockResult::Overflow {
-            self.data = serial_input;
-            interrupt_handler.request_interrupt(Interrupt::Serial)
+            // self.data = serial_input;
+            interrupt_handler.request_interrupt(Interrupt::Serial);
+            None
+        } else {
+            None
         }
     }
 }

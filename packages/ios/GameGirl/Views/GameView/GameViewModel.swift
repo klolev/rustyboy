@@ -110,7 +110,7 @@ class GameViewModel {
 
     public func update(deltaTime: Double) -> Data? {
         guard let gameboy else { return nil }
-        let result = gameboy.update(input: .init(heldButtons: heldButtons), deltaTime: deltaTime)
+        let result = gameboy.update(input: .init(heldButtons: heldButtons, serialDataInput: nil), deltaTime: deltaTime)
 
         if let audioSamples = result.audioSamples {
             audioBufferBuffer.append(contentsOf: audioSamples)
@@ -154,7 +154,7 @@ class GameViewModel {
 
     func pause(withGameboy gameboy: GameGirlGameboy) {
         guard pauseScreen == nil else { return }
-        pauseScreen = gameboy.runToVblank(input: .init(heldButtons: heldButtons))
+        pauseScreen = gameboy.runToVblank(input: .init(heldButtons: heldButtons, serialDataInput: nil))
     }
 
     func resume() {

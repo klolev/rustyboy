@@ -3,6 +3,10 @@ import SwiftData
 import Slingshot
 
 struct RecentlyPlayedGamesListView: View {
+    private func didTapDeleteGame(game: Game) {
+        
+    }
+    
     enum ViewState {
         struct AlphabeticalState {
             @State
@@ -56,12 +60,11 @@ struct RecentlyPlayedGamesListView: View {
     
     let state: ViewState
     let didSelectGame: (Game) -> Void
-    
+
     @Query
     private var sortedGames: [Game]
     
-    init(state: ViewState,
-         didSelectGame: @escaping (Game) -> Void) {
+    init(state: ViewState, didSelectGame: @escaping (Game) -> Void) {
         self.state = state
         self.didSelectGame = didSelectGame
         self._sortedGames = .init(sort: state.sortDescriptors)
@@ -72,14 +75,20 @@ struct RecentlyPlayedGamesListView: View {
         switch state.games(from: sortedGames) {
         case .right(let flat):
             ForEach(flat, id: \.id) { game in
-                GameListCellView(name: game.name, image: game.image, didSelect: { didSelectGame(game) })
+                GameListCellView(name: game.name,
+                                 image: game.image,
+                                 didSelect: { didSelectGame(game) },
+                                 didTapDelete: { didTapDeleteGame(game: game) })
                     .id(game.id)
             }
         case .left(let grouped):
             ForEach(grouped, id: \.0) { section in
                 Section {
                     ForEach(section.1) { game in
-                        GameListCellView(name: game.name, image: game.image, didSelect: { didSelectGame(game) })
+                        GameListCellView(name: game.name,
+                                         image: game.image,
+                                         didSelect: { didSelectGame(game) },
+                                         didTapDelete: { didTapDeleteGame(game: game) })
                     }
                 } header: {
                     HStack {

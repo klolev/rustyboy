@@ -19,6 +19,9 @@ struct GamesListView: View {
     }
     
     @State
+    private var isPresentingSettings: Bool = false
+    
+    @State
     private var selectedSort: Sort = .lastPlayed
     private let didSelectGame: (Game) -> Void
     private let didTapAddGame: () -> Void
@@ -43,24 +46,36 @@ struct GamesListView: View {
     
     var body: some View {
         NavigationStack {
-            RecentlyPlayedGamesListView(state: viewState,
-                                        didSelectGame: didSelectGame)
+            RecentlyPlayedGamesListView(state: viewState, didSelectGame: didSelectGame)
             .animation(.default, value: selectedSort)
             .frame(maxWidth: .infinity)
             .toolbar {
-                Picker("Sort", selection: $selectedSort) {
-                    ForEach(Sort.allCases) { sort in
-                        Image(systemName: sort.symbol)
-                            .tag(sort)
+                ToolbarItem(placement: .primaryAction) {
+                    Picker("Sort", selection: $selectedSort) {
+                        ForEach(Sort.allCases) { sort in
+                            Image(systemName: sort.symbol)
+                                .tag(sort)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: didTapAddGame) {
+                        Image(systemName: "plus")
                     }
                 }
-                .pickerStyle(.segmented)
                 
-                Button(action: didTapAddGame) {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .navigation) {
+                    Button(action: { isPresentingSettings = true }) {
+                        Image(systemName: "gear")
+                    }
                 }
             }
             .navigationTitle("games")
+            .navigationDestination(isPresented: $isPresentingSettings) {
+                SettingsView()
+            }
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif

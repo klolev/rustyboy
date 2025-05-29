@@ -71,6 +71,7 @@ enum Button {
 
 dictionary StepInput {
   u8 held_buttons;
+  boolean? serial_data_input;
 };
 
 dictionary AudioSample {
