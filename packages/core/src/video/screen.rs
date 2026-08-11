@@ -153,7 +153,7 @@ impl Screen {
             .iter()
             .map(|tile_index| addressing_mode.adjust_index(u16::from(*tile_index)))
             .map(|tile_index| &tile_data[tile_index as usize])
-            .flat_map(|tile| tile.colored_line(tile_y as u8, false, false).to_vec())
+            .flat_map(|tile| tile.colored_line(tile_y as u8, false, false))
             .map(|color| DrawnColor {
                 color: palette.color(color),
                 color_value: color,

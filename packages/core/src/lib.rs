@@ -99,14 +99,23 @@ impl GameGirlGameboy {
         let cycles = delta_time * CLOCK_SPEED;
         let mut needs_redraw = false;
         let mut audio_samples: Option<Vec<AudioSample>> = None;
+        // `is_buffer_ready` stays true for a whole sample period (87 clocks), so
+        // only take a sample on the rising edge. Sampling on every ready clock
+        // allocated the 2048-sample buffer 87 times per wrap and threw away all
+        // but the last one.
+        let mut was_ready = gb.hardware().sound.is_buffer_ready();
         for _ in 0..(cycles as u64) {
             if let GameboyStepResult(_, Some(StatusMode::VBlank)) = gb.step(input) {
                 needs_redraw = true;
             }
 
-            if gb.hardware().sound.is_buffer_ready() {
-                audio_samples = Some(gb.hardware().sound.sample());
+            let ready = gb.hardware().sound.is_buffer_ready();
+            if ready && !was_ready {
+                audio_samples
+                    .get_or_insert_with(Vec::new)
+                    .extend_from_slice(&gb.hardware().sound.sample());
             }
+            was_ready = ready;
         }
 
         let frame = if needs_redraw {
